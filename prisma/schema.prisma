@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// RF03: Cadastro de Lead
+model Lead {
+  id            String   @id @default(uuid())
+  nome          String
+  email         String   @unique
+  whatsapp      String
+  emailValidado Boolean  @default(false) // RF11: Marca se o e-mail foi verificado
+  criadoEm      DateTime @default(now())
+  pedidos       Pedido[]
+}
+
+// RNF03 e Regras de Negócio do OTP (RN02, RN03, RN04)
+model Otp {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  codigoHash String   // Representação protegida do código
+  expiraEm   DateTime
+  tentativas Int      @default(0)
+  utilizado  Boolean  @default(false)
+  criadoEm   DateTime @default(now())
+}
+
+// RF13 e RF14: Criação e Status do Pedido
+model Pedido {
+  id         String       @id @default(uuid())
+  leadId     String
+  lead       Lead         @relation(fields: [leadId], references: [id])
+  produto    String
+  valor      Decimal      @db.Decimal(10, 2)
+  status     StatusPedido @default(PENDENTE)
+  criadoEm   DateTime     @default(now())
+  atualizadoEm DateTime   @updatedAt
+}
+
+enum StatusPedido {
+  PENDENTE
+  PAGO
+  CANCELADO
+}
