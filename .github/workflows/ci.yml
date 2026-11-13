@@ -1,0 +1,37 @@
+name: CI do Hotel Serpa
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Integracao Continua (Linter, Tests, Build)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar Dependências
+        run: npm ci
+
+      # Job 1: Linter - Verifica qualidade e padronização
+      - name: Executar Linter
+        run: npm run lint
+
+      # Job 2: Tests - Executa testes automatizados
+      - name: Executar Testes Automatizados
+        run: npm run test
+
+      # Job 3: Build Check - Verifica se a aplicação é construída sem erros
+      - name: Executar Build Check
+        run: npm run build
